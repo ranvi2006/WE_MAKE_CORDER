@@ -1,31 +1,58 @@
 const express = require("express");
-const { query } = require("express-validator");
-const { validationResult } = require("express-validator");
-
-const {
-  getMyRequests,
-} = require("../controllers/myRequests.controller");
+const CounselingRequest = require("../models/CounselingRequest");
+const InterviewPracticeRequest = require("../models/InterviewPracticeRequest");
 
 const router = express.Router();
 
 /**
- * GET /api/my-requests
+ * GET USER REQUESTS (COUNSELING + INTERVIEW)
+ * GET /api/my-requests?email=
  */
-router.get(
-  "/my-requests",
-  [
-    query("email")
-      .isEmail()
-      .withMessage("Valid email is required"),
-  ],
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+router.get("/my-requests", async (req, res, next) => {
+  try {
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({
+        message: "Email query parameter is required",
+      });
     }
-    next();
-  },
-  getMyRequests
-);
+
+    // Counseling requests
+    const counselingRequests = await CounselingRequest.find({ email })
+      .sort({ createdAt: -1 })
+      .select("status createdAt");
+
+    // Interview practice requests
+    const interviewPracticeRequests =
+      await InterviewPracticeRequest.find({ email })
+        .sort({ createdAt: -1 })
+        .select("status meetingDateTime meetingLink createdAt");
+
+    // Normalize for frontend
+    const normalized = [
+      ...counselingRequests.map((r) => ({
+        id: r._id,
+        type: "Counseling",
+        status: r.status,
+        meetingDate: null,
+        meetingLink: null,
+        createdAt: r.createdAt,
+      })),
+      ...interviewPracticeRequests.map((r) => ({
+        id: r._id,
+        type: "Interview",
+        status: r.status,
+        meetingDate: r.meetingDateTime,
+        meetingLink: r.meetingLink || null,
+        createdAt: r.createdAt,
+      })),
+    ];
+
+    res.status(200).json(normalized);
+  } catch (error) {
+    next(error);
+  }
+});
 
 module.exports = router;

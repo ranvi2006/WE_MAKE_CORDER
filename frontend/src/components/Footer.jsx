@@ -1,7 +1,7 @@
-export default function Footer(){
+export default function Footer() {
   return (
     <footer className="footer">
-      <div>© 2025 We Make Corder</div>
+      © {new Date().getFullYear()} We Make Corder. All rights reserved.
     </footer>
   )
 }

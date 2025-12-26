@@ -1,11 +1,17 @@
-import React from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
-export default function PrivateRoute({ children }){
+export default function PrivateRoute({ children }) {
   const { loading, isAuthenticated } = useAuth()
 
-  if(loading) return null
-  if(isAuthenticated()) return children
-  return <Navigate to="/admin/login" replace />
+  // While checking auth state, render nothing
+  if (loading) return null
+
+  // Not logged in → redirect to admin login
+  if (!isAuthenticated()) {
+    return <Navigate to="/admin/login" replace />
+  }
+
+  // Logged in → allow access
+  return children
 }

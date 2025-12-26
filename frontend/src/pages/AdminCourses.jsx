@@ -1,93 +1,152 @@
 import { useEffect, useState } from 'react'
 import client from '../api/client'
 
-export default function AdminCourses(){
+export default function AdminCourses() {
   const [courses, setCourses] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [newCourse, setNewCourse] = useState({ title:'', description:'', duration:'', level:'Beginner', published:false })
+  const [creating, setCreating] = useState(false)
   const [editing, setEditing] = useState({})
   const [updatingIds, setUpdatingIds] = useState(new Set())
 
-  useEffect(()=>{
+  const [newCourse, setNewCourse] = useState({
+    title: '',
+    description: '',
+    duration: '',
+    level: 'Beginner',
+    published: false
+  })
+
+  useEffect(() => {
     let mounted = true
     setLoading(true)
-    client.get('/api/admin/courses')
-      .then(res => {
-        if(!mounted) return
-        const data = Array.isArray(res.data) ? res.data : (res.data?.courses || [])
+
+    client
+      .get('/api/admin/courses')
+      .then((res) => {
+        if (!mounted) return
+        const data = Array.isArray(res.data)
+          ? res.data
+          : res.data?.courses || []
         setCourses(data)
       })
-      .catch(err => {
-        if(!mounted) return
-        setError(err?.response?.data?.message || err.message || 'Failed to load courses')
+      .catch((err) => {
+        if (!mounted) return
+        setError(
+          err?.response?.data?.message ||
+            err.message ||
+            'Failed to load courses'
+        )
       })
-      .finally(()=> mounted && setLoading(false))
+      .finally(() => mounted && setLoading(false))
 
-    return ()=>{ mounted = false }
+    return () => {
+      mounted = false
+    }
   }, [])
 
-  async function createCourse(e){
+  async function createCourse(e) {
     e.preventDefault()
     setError('')
-    try{
+    setCreating(true)
+
+    try {
       const res = await client.post('/api/admin/courses', newCourse)
-      const created = res.data
-      setCourses(prev => [created, ...prev])
-      setNewCourse({ title:'', description:'', duration:'', level:'Beginner', published:false })
-    }catch(err){
-      setError(err?.response?.data?.message || err.message || 'Create failed')
+      setCourses((prev) => [res.data, ...prev])
+      setNewCourse({
+        title: '',
+        description: '',
+        duration: '',
+        level: 'Beginner',
+        published: false
+      })
+    } catch (err) {
+      setError(
+        err?.response?.data?.message ||
+          err.message ||
+          'Failed to create course'
+      )
+    } finally {
+      setCreating(false)
     }
   }
 
-  function startEdit(course){
-    setEditing(prev => ({ ...prev, [course.id]: { ...course, dirty:false }}))
+  function startEdit(course) {
+    setEditing((prev) => ({
+      ...prev,
+      [course._id]: { ...course, dirty: false }
+    }))
   }
 
-  function changeEdit(id, field, value){
-    setEditing(prev => ({ ...prev, [id]: { ...(prev[id]||{}), [field]: value, dirty:true }}))
+  function changeEdit(id, field, value) {
+    setEditing((prev) => ({
+      ...prev,
+      [id]: {
+        ...(prev[id] || {}),
+        [field]: value,
+        dirty: true
+      }
+    }))
   }
 
-  async function saveEdit(id){
+  async function saveEdit(id) {
     const ed = editing[id]
-    if(!ed) return
-    const payload = { title: ed.title, description: ed.description, duration: ed.duration, level: ed.level, published: !!ed.published }
-    setUpdatingIds(prev => new Set(prev).add(id))
-    try{
-      const res = await client.put(`/api/admin/courses/${id}`, payload)
+    if (!ed) return
+
+    setUpdatingIds((prev) => new Set(prev).add(id))
+    try {
+      const res = await client.put(`/api/admin/courses/${id}`, {
+        title: ed.title,
+        description: ed.description,
+        duration: ed.duration,
+        level: ed.level,
+        published: ed.published
+      })
+
       const updated = res.data || {}
-      setCourses(prev => prev.map(c => c.id === id ? { ...c, ...updated } : c))
-      setEditing(prev => ({ ...prev, [id]: { ...prev[id], dirty:false }}))
-    }catch(err){
-      setError(err?.response?.data?.message || err.message || 'Save failed')
-    }finally{
-      setUpdatingIds(prev => { const copy = new Set(prev); copy.delete(id); return copy })
+
+      setCourses((prev) =>
+        prev.map((c) => (c._id === id ? { ...c, ...updated } : c))
+      )
+
+      setEditing((prev) => ({
+        ...prev,
+        [id]: { ...prev[id], dirty: false }
+      }))
+    } catch (err) {
+      setError(
+        err?.response?.data?.message ||
+          err.message ||
+          'Failed to update course'
+      )
+    } finally {
+      setUpdatingIds((prev) => {
+        const copy = new Set(prev)
+        copy.delete(id)
+        return copy
+      })
     }
   }
 
-  async function deleteCourse(id){
-    if(!confirm('Delete this course?')) return
-    setUpdatingIds(prev => new Set(prev).add(id))
-    try{
+  async function deleteCourse(id) {
+    if (!window.confirm('Delete this course?')) return
+
+    setUpdatingIds((prev) => new Set(prev).add(id))
+    try {
       await client.delete(`/api/admin/courses/${id}`)
-      setCourses(prev => prev.filter(c => c.id !== id))
-    }catch(err){
-      setError(err?.response?.data?.message || err.message || 'Delete failed')
-    }finally{
-      setUpdatingIds(prev => { const copy = new Set(prev); copy.delete(id); return copy })
-    }
-  }
-
-  async function togglePublished(id, current){
-    setUpdatingIds(prev => new Set(prev).add(id))
-    try{
-      const res = await client.put(`/api/admin/courses/${id}`, { published: !current })
-      const updated = res.data || {}
-      setCourses(prev => prev.map(c => c.id === id ? { ...c, ...updated } : c))
-    }catch(err){
-      setError(err?.response?.data?.message || err.message || 'Toggle failed')
-    }finally{
-      setUpdatingIds(prev => { const copy = new Set(prev); copy.delete(id); return copy })
+      setCourses((prev) => prev.filter((c) => c._id !== id))
+    } catch (err) {
+      setError(
+        err?.response?.data?.message ||
+          err.message ||
+          'Failed to delete course'
+      )
+    } finally {
+      setUpdatingIds((prev) => {
+        const copy = new Set(prev)
+        copy.delete(id)
+        return copy
+      })
     }
   }
 
@@ -95,34 +154,74 @@ export default function AdminCourses(){
     <section>
       <div className="card">
         <h2>Course Management</h2>
-        <p className="muted">Create, edit, and delete courses.</p>
+        <p className="muted" style={{ marginTop: 8 }}>
+          Create, edit, publish, or delete courses.
+        </p>
 
         {error && <div className="error-message">{error}</div>}
 
-        <form onSubmit={createCourse} style={{marginTop:12,marginBottom:18}}>
-          <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-            <input placeholder="Title" value={newCourse.title} onChange={e=>setNewCourse({...newCourse, title:e.target.value})} style={{flex:2,minWidth:200}} />
-            <input placeholder="Duration" value={newCourse.duration} onChange={e=>setNewCourse({...newCourse, duration:e.target.value})} style={{width:140}} />
-            <select value={newCourse.level} onChange={e=>setNewCourse({...newCourse, level:e.target.value})}>
+        {/* Create Course */}
+        <form onSubmit={createCourse} style={{ marginTop: 16 }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <input
+              placeholder="Title"
+              value={newCourse.title}
+              onChange={(e) =>
+                setNewCourse({ ...newCourse, title: e.target.value })
+              }
+              required
+            />
+            <input
+              placeholder="Duration"
+              value={newCourse.duration}
+              onChange={(e) =>
+                setNewCourse({ ...newCourse, duration: e.target.value })
+              }
+            />
+            <select
+              value={newCourse.level}
+              onChange={(e) =>
+                setNewCourse({ ...newCourse, level: e.target.value })
+              }
+            >
               <option>Beginner</option>
               <option>Intermediate</option>
               <option>Advanced</option>
             </select>
-            <label style={{display:'flex',alignItems:'center',gap:6}}>
-              <input type="checkbox" checked={newCourse.published} onChange={e=>setNewCourse({...newCourse, published:e.target.checked})} /> Published
+
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <input
+                type="checkbox"
+                checked={newCourse.published}
+                onChange={(e) =>
+                  setNewCourse({ ...newCourse, published: e.target.checked })
+                }
+              />
+              Published
             </label>
-            <button className="btn" type="submit">Add Course</button>
+
+            <button className="btn" type="submit" disabled={creating}>
+              {creating ? 'Creating…' : 'Add Course'}
+            </button>
           </div>
-          <div style={{marginTop:8}}>
-            <textarea placeholder="Description" value={newCourse.description} onChange={e=>setNewCourse({...newCourse, description:e.target.value})} style={{width:'100%',minHeight:80,marginTop:8}} />
-          </div>
+
+          <textarea
+            placeholder="Description"
+            value={newCourse.description}
+            onChange={(e) =>
+              setNewCourse({ ...newCourse, description: e.target.value })
+            }
+            style={{ marginTop: 8 }}
+            rows={3}
+          />
         </form>
 
-        {loading ? (
-          <p className="muted">Loading courses…</p>
-        ) : (
+        {/* Course List */}
+        {loading && <p className="muted">Loading courses…</p>}
+
+        {!loading && (
           <div className="admin-table">
-            <div className="table-head admin-row">
+            <div className="admin-row" style={{ fontWeight: 600 }}>
               <div>Title</div>
               <div>Duration</div>
               <div>Level</div>
@@ -131,43 +230,115 @@ export default function AdminCourses(){
               <div></div>
             </div>
 
-            {courses.map(c => {
-              const ed = editing[c.id]
-              const isUpdating = updatingIds.has(c.id)
+            {courses.map((course) => {
+              const ed = editing[course._id]
+              const isUpdating = updatingIds.has(course._id)
+
               return (
-                <div key={c.id} className="table-row admin-row">
-                  <div>
-                    {ed ? <input value={ed.title} onChange={e=>changeEdit(c.id,'title',e.target.value)} /> : <strong>{c.title}</strong>}
-                  </div>
-                  <div>{ed ? <input value={ed.duration} onChange={e=>changeEdit(c.id,'duration',e.target.value)} style={{width:120}} /> : c.duration}</div>
-                  <div>{ed ? (
-                    <select value={ed.level} onChange={e=>changeEdit(c.id,'level',e.target.value)}>
-                      <option>Beginner</option>
-                      <option>Intermediate</option>
-                      <option>Advanced</option>
-                    </select>
-                  ) : c.level}</div>
-                  <div>
-                    <label style={{display:'flex',alignItems:'center',gap:6}}>
-                      <input type="checkbox" checked={(ed ? !!ed.published : !!c.published)} onChange={e=>{
-                        if(ed){ changeEdit(c.id,'published',e.target.checked) }
-                        else { togglePublished(c.id, !!c.published) }
-                      }} />
-                    </label>
-                  </div>
-                  <div>
-                    {ed ? <textarea value={ed.description} onChange={e=>changeEdit(c.id,'description',e.target.value)} style={{minHeight:48}} /> : <div style={{maxWidth:420}}>{c.description}</div>}
-                  </div>
+                <div key={course._id} className="admin-row">
                   <div>
                     {ed ? (
-                      <div style={{display:'flex',gap:8}}>
-                        <button className="btn" onClick={()=>saveEdit(c.id)} disabled={!ed.dirty || isUpdating}>{isUpdating ? 'Saving...' : 'Save'}</button>
-                        <button onClick={()=>setEditing(prev=>{ const copy={...prev}; delete copy[c.id]; return copy })} disabled={isUpdating}>Cancel</button>
+                      <input
+                        value={ed.title}
+                        onChange={(e) =>
+                          changeEdit(course._id, 'title', e.target.value)
+                        }
+                      />
+                    ) : (
+                      <strong>{course.title}</strong>
+                    )}
+                  </div>
+
+                  <div>
+                    {ed ? (
+                      <input
+                        value={ed.duration || ''}
+                        onChange={(e) =>
+                          changeEdit(course._id, 'duration', e.target.value)
+                        }
+                      />
+                    ) : (
+                      course.duration || '—'
+                    )}
+                  </div>
+
+                  <div>
+                    {ed ? (
+                      <select
+                        value={ed.level}
+                        onChange={(e) =>
+                          changeEdit(course._id, 'level', e.target.value)
+                        }
+                      >
+                        <option>Beginner</option>
+                        <option>Intermediate</option>
+                        <option>Advanced</option>
+                      </select>
+                    ) : (
+                      course.level
+                    )}
+                  </div>
+
+                  <div>
+                    <input
+                      type="checkbox"
+                      checked={ed ? ed.published : course.published}
+                      onChange={(e) =>
+                        ed
+                          ? changeEdit(
+                              course._id,
+                              'published',
+                              e.target.checked
+                            )
+                          : startEdit(course)
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    {ed ? (
+                      <textarea
+                        rows={2}
+                        value={ed.description}
+                        onChange={(e) =>
+                          changeEdit(
+                            course._id,
+                            'description',
+                            e.target.value
+                          )
+                        }
+                      />
+                    ) : (
+                      course.description
+                    )}
+                  </div>
+
+                  <div>
+                    {ed ? (
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button
+                          className="btn"
+                          onClick={() => saveEdit(course._id)}
+                          disabled={!ed.dirty || isUpdating}
+                        >
+                          {isUpdating ? 'Saving…' : 'Save'}
+                        </button>
+                        <button onClick={() => setEditing({})}>Cancel</button>
                       </div>
                     ) : (
-                      <div style={{display:'flex',gap:8}}>
-                        <button className="btn" onClick={()=>startEdit(c)}>Edit</button>
-                        <button onClick={()=>deleteCourse(c.id)} disabled={isUpdating} style={{background:'#ef4444'}}>Delete</button>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button
+                          className="btn"
+                          onClick={() => startEdit(course)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => deleteCourse(course._id)}
+                          style={{ background: '#dc2626' }}
+                        >
+                          Delete
+                        </button>
                       </div>
                     )}
                   </div>
@@ -175,8 +346,7 @@ export default function AdminCourses(){
               )
             })}
           </div>
-        )}
-
+      )}
       </div>
     </section>
   )

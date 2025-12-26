@@ -1,61 +1,76 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import authService from '../services/authService'
 import { useAuth } from '../context/AuthContext'
 
-export default function AdminLogin(){
+export default function AdminLogin() {
+  const { login } = useAuth()
+  const navigate = useNavigate()
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
-  const { setAuth } = useAuth()
+  const [error, setError] = useState('')
 
-  async function handleSubmit(e){
+  async function handleSubmit(e) {
     e.preventDefault()
     setError('')
-    if(!email || !password){
+
+    if (!email || !password) {
       setError('Email and password are required')
       return
     }
+
     setLoading(true)
-    try{
-      const { token, admin } = await authService.loginAdmin(email, password)
-      if(token){
-        // update context
-        setAuth(token, admin)
-        navigate('/admin/dashboard')
-      }else{
-        setError('Invalid response from server')
-      }
-    }catch(err){
-      setError(err?.response?.data?.message || err.message || 'Login failed')
-    }finally{
+    try {
+      await login({ email, password })
+      navigate('/admin/dashboard')
+    } catch (err) {
+      setError(
+        err?.response?.data?.message ||
+          err.message ||
+          'Invalid email or password'
+      )
+    } finally {
       setLoading(false)
     }
   }
 
   return (
     <section>
-      <div className="card" style={{maxWidth:520,margin:'0 auto'}}>
+      <div className="card" style={{ maxWidth: 420, margin: '0 auto' }}>
         <h2>Admin Login</h2>
-        <p className="muted">Sign in to access the admin dashboard.</p>
 
-        {error && <div className="error-message" style={{marginTop:12}}>{error}</div>}
+        <p className="muted" style={{ marginTop: 8 }}>
+          Sign in to access the admin dashboard.
+        </p>
 
-        <form onSubmit={handleSubmit} style={{marginTop:14}}>
+        {error && <div className="error-message">{error}</div>}
+
+        <form onSubmit={handleSubmit} style={{ marginTop: 16 }}>
           <div className="form-row">
             <label>Email</label>
-            <input name="email" type="email" value={email} onChange={e=>setEmail(e.target.value)} />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="admin@example.com"
+            />
           </div>
 
           <div className="form-row">
             <label>Password</label>
-            <input name="password" type="password" value={password} onChange={e=>setPassword(e.target.value)} />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+            />
           </div>
 
           <div className="form-actions">
-            <button className="btn" type="submit" disabled={loading}>{loading ? 'Signing in…' : 'Sign in'}</button>
+            <button className="btn" type="submit" disabled={loading}>
+              {loading ? 'Signing in…' : 'Sign In'}
+            </button>
           </div>
         </form>
       </div>

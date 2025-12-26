@@ -1,9 +1,7 @@
 const CounselingRequest = require("../models/CounselingRequest");
 const { validationResult } = require("express-validator");
 
-/**
- * POST /api/counseling-requests
- */
+// POST /api/counseling-requests
 exports.createCounselingRequest = async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -25,29 +23,34 @@ exports.createCounselingRequest = async (req, res) => {
       message: "Counseling request submitted successfully",
       request,
     });
-  } catch (error) {
+  } catch (err) {
     res.status(500).json({ message: "Failed to submit counseling request" });
   }
 };
 
-/**
- * GET /api/admin/counseling
- */
+// GET /api/admin/counseling
 exports.getAllCounselingRequests = async (req, res) => {
   try {
-    const requests = await CounselingRequest.find().sort({
-      createdAt: -1,
-    });
+    const requests = await CounselingRequest.find().sort({ createdAt: -1 });
 
-    res.json(requests);
-  } catch (error) {
+    const formatted = requests.map((r) => ({
+      id: r._id,
+      name: r.name,
+      email: r.email,
+      goal: r.goal,
+      message: r.message,
+      status: r.status,
+      notes: r.notes,
+      createdAt: r.createdAt,
+    }));
+
+    res.json(formatted);
+  } catch (err) {
     res.status(500).json({ message: "Failed to fetch counseling requests" });
   }
 };
 
-/**
- * PUT /api/admin/counseling/:id
- */
+// PUT /api/admin/counseling/:id
 exports.updateCounselingRequest = async (req, res) => {
   try {
     const { id } = req.params;
@@ -56,7 +59,7 @@ exports.updateCounselingRequest = async (req, res) => {
     const updated = await CounselingRequest.findByIdAndUpdate(
       id,
       { status, notes },
-      { new: true, runValidators: true }
+      { new: true }
     );
 
     if (!updated) {
@@ -64,10 +67,11 @@ exports.updateCounselingRequest = async (req, res) => {
     }
 
     res.json({
-      message: "Counseling request updated",
-      request: updated,
+      id: updated._id,
+      status: updated.status,
+      notes: updated.notes,
     });
-  } catch (error) {
+  } catch (err) {
     res.status(500).json({ message: "Failed to update counseling request" });
   }
 };

@@ -1,28 +1,45 @@
 import { useState } from 'react'
 import client from '../api/client'
 
-export default function MyMeetings(){
+function validateEmail(email) {
+  return /\S+@\S+\.\S+/.test(email)
+}
+
+export default function MyMeetings() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [requests, setRequests] = useState([])
+  const [data, setData] = useState({
+    counselingRequests: [],
+    interviewPracticeRequests: []
+  })
 
-  async function handleSubmit(e){
+  async function handleSubmit(e) {
     e.preventDefault()
     setError('')
-    setRequests([])
-    if(!email || !/\S+@\S+\.\S+/.test(email)){
-      setError('Please enter a valid email')
+    setData({ counselingRequests: [], interviewPracticeRequests: [] })
+
+    if (!email || !validateEmail(email)) {
+      setError('Please enter a valid email address')
       return
     }
+
     setLoading(true)
-    try{
-      const res = await client.get(`/api/my-requests`, { params: { email } })
-      const data = Array.isArray(res.data) ? res.data : (res.data?.requests || [])
-      setRequests(data)
-    }catch(err){
-      setError(err?.response?.data?.message || err.message || 'Failed to load requests')
-    }finally{
+    try {
+      const res = await client.get('/api/my-requests', {
+        params: { email }
+      })
+      setData({
+        counselingRequests: res.data?.counselingRequests || [],
+        interviewPracticeRequests: res.data?.interviewPracticeRequests || []
+      })
+    } catch (err) {
+      setError(
+        err?.response?.data?.message ||
+          err.message ||
+          'Failed to fetch requests'
+      )
+    } finally {
       setLoading(false)
     }
   }
@@ -31,67 +48,99 @@ export default function MyMeetings(){
     <section>
       <div className="card">
         <h2>My Meetings</h2>
-        <p className="muted">Enter your email to view counseling and interview requests.</p>
+        <p className="muted" style={{ marginTop: 8 }}>
+          Enter your email to view your counseling and interview practice
+          requests.
+        </p>
 
-        <form onSubmit={handleSubmit} style={{display:'flex',gap:12,marginTop:12,flexWrap:'wrap'}}>
-          <input name="email" type="email" placeholder="you@example.com" value={email} onChange={(e)=>setEmail(e.target.value)} style={{flex:'1 1 320px'}} />
-          <button className="btn" type="submit" disabled={loading}>{loading ? 'Searching…' : 'Find'}</button>
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            display: 'flex',
+            gap: 12,
+            marginTop: 12,
+            flexWrap: 'wrap'
+          }}
+        >
+          <input
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={{ flex: '1 1 300px' }}
+          />
+          <button className="btn" type="submit" disabled={loading}>
+            {loading ? 'Searching…' : 'Find'}
+          </button>
         </form>
 
-        {error && <div className="error-message" style={{marginTop:12}}>{error}</div>}
+        {error && <div className="error-message">{error}</div>}
+        {loading && <p className="muted">Loading…</p>}
 
-        {!loading && requests.length === 0 && !error && (
-          <p className="muted" style={{marginTop:12}}>No requests found. Try a different email.</p>
-        )}
-
-        {loading && <p className="muted" style={{marginTop:12}}>Loading…</p>}
-
-        {requests.length > 0 && (
-          <div style={{marginTop:16}}>
-            <div className="requests-table">
-              <div className="table-head">
-                <div>Type</div>
-                <div>Status</div>
-                <div>Meeting</div>
-                <div></div>
+        {/* Counseling Requests */}
+        {data.counselingRequests.length > 0 && (
+          <div style={{ marginTop: 20 }}>
+            <h3>Counseling Requests</h3>
+            {data.counselingRequests.map((req) => (
+              <div key={req._id} className="card" style={{ marginTop: 12 }}>
+                <div>
+                  <strong>Goal:</strong> {req.goal}
+                </div>
+                <div>
+                  <strong>Status:</strong> {req.status}
+                </div>
+                <div className="muted">
+                  Requested on:{' '}
+                  {new Date(req.createdAt).toLocaleString()}
+                </div>
               </div>
-              {requests.map((r)=> (
-                <div key={r.id || r._id || r.createdAt} className="table-row">
-                  <div>{r.type || (r.requestType==='interview'?'Interview':'Counseling')}</div>
-                  <div>{r.status || 'Pending'}</div>
-                  <div>{r.meetingDate ? new Date(r.meetingDate).toLocaleString() : (r.scheduledAt ? new Date(r.scheduledAt).toLocaleString() : '—')}</div>
-                  <div>
-                    {r.meetingLink ? (
-                      <a className="btn" href={r.meetingLink} target="_blank" rel="noopener noreferrer">Join Meeting</a>
-                    ) : (
-                      <span className="muted">No link</span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Mobile cards */}
-            <div className="requests-cards">
-              {requests.map((r)=> (
-                <div key={r.id || r._id || r.createdAt} className="request-card">
-                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                    <strong>{r.type || (r.requestType==='interview'?'Interview':'Counseling')}</strong>
-                    <span className="muted">{r.status || 'Pending'}</span>
-                  </div>
-                  <div style={{marginTop:8}}>{r.meetingDate ? new Date(r.meetingDate).toLocaleString() : (r.scheduledAt ? new Date(r.scheduledAt).toLocaleString() : 'Meeting time not set')}</div>
-                  <div style={{marginTop:10}}>
-                    {r.meetingLink ? (
-                      <a className="btn" href={r.meetingLink} target="_blank" rel="noopener noreferrer">Join Meeting</a>
-                    ) : (
-                      <span className="muted">No meeting link yet</span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+            ))}
           </div>
         )}
+
+        {/* Interview Practice Requests */}
+        {data.interviewPracticeRequests.length > 0 && (
+          <div style={{ marginTop: 20 }}>
+            <h3>Interview Practice Requests</h3>
+            {data.interviewPracticeRequests.map((req) => (
+              <div key={req._id} className="card" style={{ marginTop: 12 }}>
+                <div>
+                  <strong>Role:</strong> {req.role}
+                </div>
+                <div>
+                  <strong>Status:</strong> {req.status}
+                </div>
+                <div>
+                  <strong>Meeting Time:</strong>{' '}
+                  {req.meetingTime
+                    ? new Date(req.meetingTime).toLocaleString()
+                    : 'Not scheduled'}
+                </div>
+                {req.meetingLink && (
+                  <div style={{ marginTop: 8 }}>
+                    <a
+                      className="btn"
+                      href={req.meetingLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Join Meeting
+                    </a>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!loading &&
+          !error &&
+          data.counselingRequests.length === 0 &&
+          data.interviewPracticeRequests.length === 0 && (
+            <p className="muted" style={{ marginTop: 16 }}>
+              No requests found for this email.
+            </p>
+          )}
       </div>
     </section>
   )

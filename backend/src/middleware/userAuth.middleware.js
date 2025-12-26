@@ -1,13 +1,13 @@
 const jwt = require("jsonwebtoken");
 
 /**
- * ADMIN AUTH MIDDLEWARE
- * Protects admin-only routes
+ * USER AUTH MIDDLEWARE
+ * Protects routes for logged-in users only
  */
 module.exports = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
-  // Check token presence
+  // Check Authorization header
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({
       message: "Authorization token missing",
@@ -20,14 +20,14 @@ module.exports = (req, res, next) => {
     // Verify JWT
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Ensure token belongs to an admin
-    if (decoded.role !== "admin") {
+    // Ensure token belongs to a USER (not admin)
+    if (decoded.role !== "user") {
       return res.status(403).json({
-        message: "Admin access only",
+        message: "Access denied",
       });
     }
 
-    // Attach admin data to request
+    // Attach user info to request
     req.user = {
       id: decoded.id,
       role: decoded.role,

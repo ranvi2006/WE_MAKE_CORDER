@@ -1,93 +1,134 @@
 import { useState } from 'react'
 import client from '../api/client'
 
-function validateEmail(email){
+function validateEmail(email) {
   return /\S+@\S+\.\S+/.test(email)
 }
 
-export default function Counseling(){
-  const [form, setForm] = useState({ name:'', email:'', goal:'', message:'' })
+export default function Counseling() {
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    goal: '',
+    message: ''
+  })
+
   const [errors, setErrors] = useState({})
-  const [submitting, setSubmitting] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState('')
   const [serverError, setServerError] = useState('')
 
-  function handleChange(e){
+  function handleChange(e) {
     const { name, value } = e.target
-    setForm(f => ({ ...f, [name]: value }))
-    setErrors(e => ({ ...e, [name]: '' }))
+    setForm((prev) => ({ ...prev, [name]: value }))
+    setErrors((prev) => ({ ...prev, [name]: '' }))
   }
 
-  async function handleSubmit(e){
+  async function handleSubmit(e) {
     e.preventDefault()
-    setServerError('')
     setSuccess('')
+    setServerError('')
 
-    const next = {}
-    if(!form.name.trim()) next.name = 'Name is required'
-    if(!form.email.trim() || !validateEmail(form.email)) next.email = 'Valid email is required'
-    if(!form.goal.trim()) next.goal = 'Please select a goal'
+    const nextErrors = {}
 
-    setErrors(next)
-    if(Object.keys(next).length) return
+    if (!form.name.trim()) nextErrors.name = 'Name is required'
+    if (!form.email.trim() || !validateEmail(form.email))
+      nextErrors.email = 'Valid email is required'
+    if (!form.goal.trim()) nextErrors.goal = 'Please select a goal'
 
-    setSubmitting(true)
-    try{
-      await client.post('/api/counseling-requests', {
-        name: form.name,
-        email: form.email,
-        goal: form.goal,
-        message: form.message
-      })
-      setSuccess('Your counseling request has been submitted and is pending review.')
-      setForm({ name:'', email:'', goal:'', message:'' })
-    }catch(err){
-      setServerError(err?.response?.data?.message || err.message || 'Failed to submit request')
-    }finally{
-      setSubmitting(false)
+    setErrors(nextErrors)
+    if (Object.keys(nextErrors).length) return
+
+    setLoading(true)
+    try {
+      await client.post('/api/counseling-requests', form)
+      setSuccess('Your counseling request has been submitted successfully.')
+      setForm({ name: '', email: '', goal: '', message: '' })
+    } catch (err) {
+      setServerError(
+        err?.response?.data?.message ||
+          err.message ||
+          'Failed to submit request'
+      )
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
     <section>
-      <div style={{maxWidth:720,margin:'0 auto'}} className="card">
+      <div className="card" style={{ maxWidth: 720, margin: '0 auto' }}>
         <h2>Book Counseling</h2>
-        <p className="muted">Tell us a bit about your goals and we'll match you with a counselor.</p>
 
-        {success && <div className="success-message" role="status">{success}</div>}
-        {serverError && <div className="error-message" role="alert">{serverError}</div>}
+        <p className="muted" style={{ marginTop: 8 }}>
+          Tell us about your goals and we will get back to you soon.
+        </p>
+
+        {success && <div className="success-message">{success}</div>}
+        {serverError && <div className="error-message">{serverError}</div>}
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="form-row">
             <label>Name *</label>
-            <input name="name" value={form.name} onChange={handleChange} placeholder="Your full name" />
-            {errors.name && <div className="field-error">{errors.name}</div>}
+            <input
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              placeholder="Your full name"
+            />
+            {errors.name && (
+              <div className="field-error">{errors.name}</div>
+            )}
           </div>
 
           <div className="form-row">
             <label>Email *</label>
-            <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="you@example.com" />
-            {errors.email && <div className="field-error">{errors.email}</div>}
+            <input
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="you@example.com"
+            />
+            {errors.email && (
+              <div className="field-error">{errors.email}</div>
+            )}
           </div>
 
           <div className="form-row">
             <label>Goal *</label>
-            <select name="goal" value={form.goal} onChange={handleChange}>
-              <option value="">Choose a goal</option>
-              <option value="career">Career guidance</option>
-              <option value="interview">Interview preparation</option>
-              <option value="skill">Skill development</option>
+            <select
+              name="goal"
+              value={form.goal}
+              onChange={handleChange}
+            >
+              <option value="">Select a goal</option>
+              <option value="Career guidance">Career guidance</option>
+              <option value="Interview preparation">
+                Interview preparation
+              </option>
+              <option value="Skill development">Skill development</option>
             </select>
-            {errors.goal && <div className="field-error">{errors.goal}</div>}
+            {errors.goal && (
+              <div className="field-error">{errors.goal}</div>
+            )}
           </div>
 
           <div className="form-row">
             <label>Message</label>
-            <textarea name="message" value={form.message} onChange={handleChange} rows={5} placeholder="Share background or specific questions (optional)" />
+            <textarea
+              name="message"
+              rows={4}
+              value={form.message}
+              onChange={handleChange}
+              placeholder="Optional details"
+            />
           </div>
 
           <div className="form-actions">
-            <button type="submit" className="btn" disabled={submitting}>{submitting ? 'Submitting…' : 'Submit Request'}</button>
+            <button className="btn" type="submit" disabled={loading}>
+              {loading ? 'Submitting…' : 'Submit Request'}
+            </button>
           </div>
         </form>
       </div>

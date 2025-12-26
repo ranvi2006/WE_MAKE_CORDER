@@ -2,70 +2,86 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 import client from '../api/client'
 
 const AuthContext = createContext(null)
+const STORAGE_KEY = 'wmc_auth'
 
-export function AuthProvider({ children }){
+export function AuthProvider({ children }) {
   const [token, setToken] = useState(null)
   const [admin, setAdmin] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(()=>{
-    // Initialize from localStorage
-    try{
-      const raw = localStorage.getItem('wmc_auth')
-      if(raw){
+  // Restore auth from localStorage on first load
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY)
+      if (raw) {
         const parsed = JSON.parse(raw)
-        if(parsed?.token){
+        if (parsed?.token) {
           setToken(parsed.token)
           setAdmin(parsed.admin || null)
         }
       }
-    }catch(e){
-      console.warn('Failed to parse auth from localStorage', e)
-    }finally{
+    } catch (err) {
+      console.warn('Failed to restore auth state', err)
+      localStorage.removeItem(STORAGE_KEY)
+    } finally {
       setLoading(false)
     }
   }, [])
 
-  async function login(credentials){
-    // credentials: { email, password } or similar - backend shape may vary
-    const res = await client.post('/api/admin/login', credentials)
-    // Expecting { token, admin } in response body
-    const body = res.data || {}
-    const t = body.token || body.accessToken || null
-    const a = body.admin || body.user || null
-    if(!t) throw new Error('No token returned from login')
-    setToken(t)
-    setAdmin(a)
-    try{ localStorage.setItem('wmc_auth', JSON.stringify({ token: t, admin: a })) }catch(e){}
-    return { token: t, admin: a }
+  // Login
+  async function login({ email, password }) {
+    const res = await client.post('/api/admin/login', { email, password })
+    const { token, admin } = res.data || {}
+
+    if (!token) {
+      throw new Error('Login failed: no token returned')
+    }
+
+    setToken(token)
+    setAdmin(admin || null)
+
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ token, admin })
+    )
+
+    return admin
   }
 
-  function setAuth(t, a){
-    setToken(t)
-    setAdmin(a || null)
-    try{ localStorage.setItem('wmc_auth', JSON.stringify({ token: t, admin: a })) }catch(e){}
-  }
-
-  function logout(){
+  // Logout
+  function logout() {
     setToken(null)
     setAdmin(null)
-    try{ localStorage.removeItem('wmc_auth') }catch(e){}
+    localStorage.removeItem(STORAGE_KEY)
   }
 
-  function isAuthenticated(){
+  // Check auth
+  function isAuthenticated() {
     return Boolean(token)
   }
 
+  const value = {
+    token,
+    admin,
+    loading,
+    login,
+    logout,
+    isAuthenticated
+  }
+
   return (
-    <AuthContext.Provider value={{ token, admin, loading, login, logout, isAuthenticated, setAuth }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   )
 }
 
-export function useAuth(){
+// Hook
+export function useAuth() {
   const ctx = useContext(AuthContext)
-  if(!ctx) throw new Error('useAuth must be used within AuthProvider')
+  if (!ctx) {
+    throw new Error('useAuth must be used within AuthProvider')
+  }
   return ctx
 }
 
