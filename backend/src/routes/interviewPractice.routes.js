@@ -94,7 +94,14 @@ router.get(
       const items = await InterviewPracticeRequest.find()
         .sort({ createdAt: -1 });
 
-      res.status(200).json(items);
+      // Add meetingTime field for frontend compatibility
+      const itemsWithMeetingTime = items.map(item => {
+        const obj = item.toObject();
+        obj.meetingTime = obj.meetingDateTime;
+        return obj;
+      });
+
+      res.status(200).json(itemsWithMeetingTime);
     } catch (error) {
       next(error);
     }
@@ -110,13 +117,15 @@ router.put(
   authMiddleware,
   async (req, res, next) => {
     try {
-      const { status, meetingDateTime, meetingLink } = req.body;
+      const { status, meetingTime, meetingDateTime, meetingLink } = req.body;
+      // Support both meetingTime (frontend) and meetingDateTime (backend)
+      const meetingDateValue = meetingTime || meetingDateTime;
 
       const updated = await InterviewPracticeRequest.findByIdAndUpdate(
         req.params.id,
         {
           status,
-          meetingDateTime,
+          meetingDateTime: meetingDateValue,
           meetingLink,
         },
         { new: true }
@@ -128,7 +137,10 @@ router.put(
         });
       }
 
-      res.status(200).json(updated);
+      // Return with meetingTime field for frontend compatibility
+      const response = updated.toObject();
+      response.meetingTime = response.meetingDateTime;
+      res.status(200).json(response);
     } catch (error) {
       next(error);
     }

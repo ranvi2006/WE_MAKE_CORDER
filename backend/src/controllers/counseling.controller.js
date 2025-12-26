@@ -34,7 +34,7 @@ exports.getAllCounselingRequests = async (req, res) => {
     const requests = await CounselingRequest.find().sort({ createdAt: -1 });
 
     const formatted = requests.map((r) => ({
-      id: r._id,
+      _id: r._id,
       name: r.name,
       email: r.email,
       goal: r.goal,
@@ -67,9 +67,14 @@ exports.updateCounselingRequest = async (req, res) => {
     }
 
     res.json({
-      id: updated._id,
+      _id: updated._id,
       status: updated.status,
       notes: updated.notes,
+      name: updated.name,
+      email: updated.email,
+      goal: updated.goal,
+      message: updated.message,
+      createdAt: updated.createdAt,
     });
   } catch (err) {
     res.status(500).json({ message: "Failed to update counseling request" });

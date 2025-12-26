@@ -263,7 +263,7 @@ export default function AdminInterviewPractice() {
             })}
           </div>
         )}
-   </div>
+      </div>
     </section>
   )
 }

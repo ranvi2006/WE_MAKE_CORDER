@@ -1,12 +1,14 @@
 const express = require("express");
 const cors = require("cors");
 
+// Import adminAuth controller to trigger default admin seed
+require("./controllers/adminAuth.controller");
+
 // =======================
 // ROUTES
 // =======================
 
 // Admin
-const adminAuthRoutes = require("./routes/adminAuth.routes");
 const adminRoutes = require("./routes/admin.routes");
 
 // Public
@@ -31,10 +33,20 @@ const app = express();
 // =======================
 // CORS CONFIG
 // =======================
-const allowedOrigin = process.env.FRONTEND_URL || "http://localhost:3000";
+const allowedOrigins = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.split(',')
+  : ["http://localhost:3000", "http://localhost:5173"];
 app.use(
   cors({
-    origin: allowedOrigin,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+        callback(null, true);
+      } else {
+        callback(null, true); // Allow all origins in development
+      }
+    },
     credentials: true,
   })
 );
@@ -62,7 +74,6 @@ app.use("/api/users", userRoutes);
 // =======================
 // ADMIN ROUTES
 // =======================
-app.use("/api/admin/auth", adminAuthRoutes);
 app.use("/api/admin", adminRoutes);
 
 // =======================

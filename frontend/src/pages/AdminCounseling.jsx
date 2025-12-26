@@ -216,7 +216,4 @@ export default function AdminCounseling() {
       </div>
     </section>
   )
-}
-function validateEmail(email) {
-  return /\S+@\S+\.\S+/.test(email)
 } 

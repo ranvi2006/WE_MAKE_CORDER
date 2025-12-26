@@ -22,6 +22,19 @@ router.get("/courses", async (req, res, next) => {
 });
 
 /* ================================
+   ADMIN: GET ALL COURSES (PUBLISHED + UNPUBLISHED)
+   GET /api/admin/courses
+================================ */
+router.get("/admin/courses", authMiddleware, async (req, res, next) => {
+  try {
+    const courses = await Course.find().sort({ createdAt: -1 });
+    res.status(200).json(courses);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/* ================================
    ADMIN: CREATE COURSE
    POST /api/admin/courses
 ================================ */

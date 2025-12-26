@@ -21,35 +21,35 @@ router.get("/my-requests", async (req, res, next) => {
     // Counseling requests
     const counselingRequests = await CounselingRequest.find({ email })
       .sort({ createdAt: -1 })
-      .select("status createdAt");
+      .select("goal status createdAt");
 
     // Interview practice requests
     const interviewPracticeRequests =
       await InterviewPracticeRequest.find({ email })
         .sort({ createdAt: -1 })
-        .select("status meetingDateTime meetingLink createdAt");
+        .select("role status meetingDateTime meetingLink createdAt");
 
-    // Normalize for frontend
-    const normalized = [
-      ...counselingRequests.map((r) => ({
-        id: r._id,
-        type: "Counseling",
-        status: r.status,
-        meetingDate: null,
-        meetingLink: null,
-        createdAt: r.createdAt,
-      })),
-      ...interviewPracticeRequests.map((r) => ({
-        id: r._id,
-        type: "Interview",
-        status: r.status,
-        meetingDate: r.meetingDateTime,
-        meetingLink: r.meetingLink || null,
-        createdAt: r.createdAt,
-      })),
-    ];
+    // Return separate arrays as frontend expects
+    const formattedCounseling = counselingRequests.map((r) => ({
+      _id: r._id,
+      goal: r.goal || 'N/A',
+      status: r.status,
+      createdAt: r.createdAt,
+    }));
 
-    res.status(200).json(normalized);
+    const formattedInterview = interviewPracticeRequests.map((r) => ({
+      _id: r._id,
+      role: r.role || 'N/A',
+      status: r.status,
+      meetingTime: r.meetingDateTime,
+      meetingLink: r.meetingLink || null,
+      createdAt: r.createdAt,
+    }));
+
+    res.status(200).json({
+      counselingRequests: formattedCounseling,
+      interviewPracticeRequests: formattedInterview,
+    });
   } catch (error) {
     next(error);
   }

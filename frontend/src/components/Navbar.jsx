@@ -14,7 +14,8 @@ export default function Navbar() {
     { to: '/learning', label: 'Learning' },
     { to: '/counseling', label: 'Counseling' },
     { to: '/interview-practice', label: 'Interview Practice' },
-    { to: '/my-meetings', label: 'My Meetings' }
+    { to: '/my-meetings', label: 'My Meetings' },
+    { to: '/admin/login', label: 'Admin' }
   ]
 
   const adminLinks = [
@@ -66,7 +67,7 @@ export default function Navbar() {
             ))}
 
           {/* Auth actions */}
-          {isAuthenticated() ? (
+          {isAuthenticated() && (
             <button
               className="btn"
               style={{ marginLeft: 12 }}
@@ -74,10 +75,6 @@ export default function Navbar() {
             >
               Logout
             </button>
-          ) : (
-            <Link to="/admin/login" className="nav-link">
-              Admin Login
-            </Link>
           )}
         </nav>
       </div>

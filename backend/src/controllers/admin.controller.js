@@ -79,7 +79,8 @@ exports.getAdminStats = async (req, res) => {
     const [
       counselingCount,
       interviewCount,
-      todaysRequests,
+      todaysCounseling,
+      todaysInterview,
       scheduledMeetings,
     ] = await Promise.all([
       CounselingRequest.countDocuments(),
@@ -88,13 +89,18 @@ exports.getAdminStats = async (req, res) => {
         createdAt: { $gte: startOfToday },
       }),
       InterviewPracticeRequest.countDocuments({
+        createdAt: { $gte: startOfToday },
+      }),
+      InterviewPracticeRequest.countDocuments({
         status: "Scheduled",
       }),
     ]);
 
+    const todaysRequests = todaysCounseling + todaysInterview;
+
     res.json({
-      counselingRequests: counselingCount,
-      interviewRequests: interviewCount,
+      totalCounseling: counselingCount,
+      totalInterview: interviewCount,
       todaysRequests,
       scheduledMeetings,
     });
