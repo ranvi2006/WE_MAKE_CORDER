@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import client from '../api/client'
+import '../pages/css/AdminDashboard.css'
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null)
@@ -56,35 +57,40 @@ export default function AdminDashboard() {
 
   return (
     <section>
-      <div className="card">
+      {/* Header + Background */}
+      <div
+        className="card"
+        style={{
+          backgroundImage:
+            'linear-gradient(rgba(27,53,96,0.85), rgba(27,53,96,0.85)), url(/images/admin-dashboard-bg.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          color: '#fff',
+        }}
+      >
         <h2>Admin Dashboard</h2>
 
-        <p className="muted" style={{ marginTop: 8 }}>
-          Overview of platform activity and requests.
+        <p style={{ marginTop: 8, opacity: 0.9 }}>
+          Overview of platform activity and incoming requests.
         </p>
 
-        {loading && <p className="muted">Loading dashboard…</p>}
+        {loading && <p style={{ opacity: 0.8 }}>Loading dashboard…</p>}
 
         {error && <div className="error-message">{error}</div>}
 
         {!loading && !error && (
-          <div className="stats-grid" style={{ marginTop: 16 }}>
+          <div className="stats-grid" style={{ marginTop: 20 }}>
             {cards.map((c) => (
-              <div key={c.key} className="stat-card">
-                <div
-                  style={{
-                    fontSize: 13,
-                    color: 'var(--text-secondary)'
-                  }}
-                >
+              <div key={c.key} className="stat-card premium-stat">
+                <div style={{ fontSize: 13, opacity: 0.85 }}>
                   {c.label}
                 </div>
 
                 <div
                   style={{
-                    fontSize: 28,
+                    fontSize: 30,
                     fontWeight: 700,
-                    marginTop: 8
+                    marginTop: 6
                   }}
                 >
                   {c.value}

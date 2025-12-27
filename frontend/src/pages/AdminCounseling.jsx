@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import client from '../api/client'
 
+
 export default function AdminCounseling() {
   const [requests, setRequests] = useState([])
   const [loading, setLoading] = useState(true)
@@ -110,23 +111,59 @@ export default function AdminCounseling() {
     })
   }
 
-  const statusOptions = ['Pending', 'In Progress', 'Scheduled', 'Completed', 'Closed']
+  const statusOptions = [
+    'Pending',
+    'In Progress',
+    'Scheduled',
+    'Completed',
+    'Closed'
+  ]
 
   return (
     <section>
+      {/* Header */}
+      <div
+        className="card"
+        style={{
+          marginBottom: 24,
+          display: 'grid',
+          gridTemplateColumns: '1.2fr 0.8fr',
+          gap: 24,
+          alignItems: 'center',
+          backgroundImage:
+            'linear-gradient(rgba(27,53,96,0.9), rgba(27,53,96,0.9)), url(/images/admin-counseling-bg.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          color: '#fff'
+        }}
+      >
+        <div>
+          <h2>Counseling Requests</h2>
+          <p style={{ marginTop: 8, opacity: 0.9 }}>
+            Review, update status, and manage notes for all counseling
+            requests submitted by users.
+          </p>
+        </div>
+
+        <img
+          src="/images/admin-counseling-header.jpg"
+          alt="Admin counseling management"
+          style={{
+            width: '100%',
+            borderRadius: 14,
+            objectFit: 'cover'
+          }}
+        />
+      </div>
+
+      {/* Table */}
       <div className="card">
-        <h2>Counseling Requests</h2>
-
-        <p className="muted" style={{ marginTop: 8 }}>
-          View and manage counseling requests submitted by users.
-        </p>
-
         {loading && <p className="muted">Loading requests…</p>}
         {error && <div className="error-message">{error}</div>}
 
         {!loading && !error && (
           <div className="admin-table">
-            <div className="admin-row" style={{ fontWeight: 600 }}>
+            <div className="admin-row admin-head">
               <div>Name</div>
               <div>Email</div>
               <div>Goal</div>
@@ -141,7 +178,11 @@ export default function AdminCounseling() {
               const isUpdating = updatingIds.has(item._id)
 
               return (
-                <div key={item._id} className="admin-row" style={{ alignItems: 'start' }}>
+                <div
+                  key={item._id}
+                  className="admin-row"
+                  style={{ alignItems: 'start' }}
+                >
                   <div>{item.name}</div>
                   <div>{item.email}</div>
                   <div>{item.goal}</div>
@@ -216,4 +257,4 @@ export default function AdminCounseling() {
       </div>
     </section>
   )
-} 
+}

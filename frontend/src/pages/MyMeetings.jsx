@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import client from '../api/client'
+import '../pages/css/MyMeeting.css'
 
 function validateEmail(email) {
   return /\S+@\S+\.\S+/.test(email)
@@ -46,20 +47,49 @@ export default function MyMeetings() {
 
   return (
     <section>
-      <div className="card">
-        <h2>My Meetings</h2>
-        <p className="muted" style={{ marginTop: 8 }}>
-          Enter your email to view your counseling and interview practice
-          requests.
-        </p>
+      {/* Header */}
+      <div
+        className="card"
+        style={{
+          marginBottom: 32,
+          display: 'grid',
+          gridTemplateColumns: '1.1fr 0.9fr',
+          gap: 32,
+          alignItems: 'center',
+          maxWidth: 1100,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+        }}
+      >
+        <div>
+          <h2>My Meetings</h2>
+          <p className="muted" style={{ marginTop: 10, maxWidth: 520 }}>
+            Track your counseling and interview practice requests,
+            view their status, and join scheduled meetings — all in
+            one place.
+          </p>
+        </div>
 
+        <img
+          src="/images/my-meetings-hero.png"
+          alt="My meetings dashboard"
+          style={{
+            width: '100%',
+            borderRadius: 16,
+            objectFit: 'cover',
+          }}
+        />
+      </div>
+
+      {/* Search */}
+      <div className="card" style={{ maxWidth: 900, margin: '0 auto' }}>
         <form
           onSubmit={handleSubmit}
           style={{
             display: 'flex',
             gap: 12,
-            marginTop: 12,
-            flexWrap: 'wrap'
+            flexWrap: 'wrap',
+            alignItems: 'center',
           }}
         >
           <input
@@ -67,10 +97,10 @@ export default function MyMeetings() {
             placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            style={{ flex: '1 1 300px' }}
+            style={{ flex: '1 1 320px' }}
           />
           <button className="btn" type="submit" disabled={loading}>
-            {loading ? 'Searching…' : 'Find'}
+            {loading ? 'Searching…' : 'Find Meetings'}
           </button>
         </form>
 
@@ -79,16 +109,12 @@ export default function MyMeetings() {
 
         {/* Counseling Requests */}
         {data.counselingRequests.length > 0 && (
-          <div style={{ marginTop: 20 }}>
+          <div style={{ marginTop: 28 }}>
             <h3>Counseling Requests</h3>
             {data.counselingRequests.map((req) => (
               <div key={req._id} className="card" style={{ marginTop: 12 }}>
-                <div>
-                  <strong>Goal:</strong> {req.goal}
-                </div>
-                <div>
-                  <strong>Status:</strong> {req.status}
-                </div>
+                <div><strong>Goal:</strong> {req.goal}</div>
+                <div><strong>Status:</strong> {req.status}</div>
                 <div className="muted">
                   Requested on:{' '}
                   {new Date(req.createdAt).toLocaleString()}
@@ -100,16 +126,12 @@ export default function MyMeetings() {
 
         {/* Interview Practice Requests */}
         {data.interviewPracticeRequests.length > 0 && (
-          <div style={{ marginTop: 20 }}>
+          <div style={{ marginTop: 28 }}>
             <h3>Interview Practice Requests</h3>
             {data.interviewPracticeRequests.map((req) => (
               <div key={req._id} className="card" style={{ marginTop: 12 }}>
-                <div>
-                  <strong>Role:</strong> {req.role}
-                </div>
-                <div>
-                  <strong>Status:</strong> {req.status}
-                </div>
+                <div><strong>Role:</strong> {req.role}</div>
+                <div><strong>Status:</strong> {req.status}</div>
                 <div>
                   <strong>Meeting Time:</strong>{' '}
                   {req.meetingTime
@@ -117,7 +139,7 @@ export default function MyMeetings() {
                     : 'Not scheduled'}
                 </div>
                 {req.meetingLink && (
-                  <div style={{ marginTop: 8 }}>
+                  <div style={{ marginTop: 10 }}>
                     <a
                       className="btn"
                       href={req.meetingLink}
@@ -137,7 +159,7 @@ export default function MyMeetings() {
           !error &&
           data.counselingRequests.length === 0 &&
           data.interviewPracticeRequests.length === 0 && (
-            <p className="muted" style={{ marginTop: 16 }}>
+            <p className="muted" style={{ marginTop: 20 }}>
               No requests found for this email.
             </p>
           )}

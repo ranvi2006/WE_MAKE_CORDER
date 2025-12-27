@@ -1,0 +1,32 @@
+.courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+  }
+  
+  .course-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #CBD5F5;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .course-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  }
+  
+  .course-image {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+  
+  .course-meta {
+    margin-top: 12px;
+    font-size: 14px;
+    color: #4B5563;
+  }
+  

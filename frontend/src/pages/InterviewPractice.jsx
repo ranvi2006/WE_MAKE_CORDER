@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import client from '../api/client'
+import '../pages/css/InterviewPractice.css'
 
 function validateEmail(email) {
   return /\S+@\S+\.\S+/.test(email)
@@ -18,6 +19,7 @@ export default function InterviewPractice() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState('')
   const [serverError, setServerError] = useState('')
+
   function handleChange(e) {
     const { name, value } = e.target
     setForm((prev) => ({ ...prev, [name]: value }))
@@ -66,13 +68,48 @@ export default function InterviewPractice() {
 
   return (
     <section>
-      <div className="card" style={{ maxWidth: 720, margin: '0 auto' }}>
-        <h2>Interview Practice</h2>
+      {/* Header */}
+      <div
+        className="card"
+        style={{
+          marginBottom: 32,
+          display: 'grid',
+          gridTemplateColumns: '1.1fr 0.9fr',
+          gap: 32,
+          alignItems: 'center',
+          maxWidth: 1100,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+        }}
+      >
+        <div>
+          <h2>Interview Practice</h2>
+          <p className="muted" style={{ marginTop: 10, maxWidth: 520 }}>
+            Practice real interview scenarios with experienced mentors
+            and receive actionable feedback to improve your confidence,
+            communication, and technical clarity.
+          </p>
+        </div>
 
-        <p className="muted" style={{ marginTop: 8 }}>
-          Request a mock interview session and receive expert feedback.
-        </p>
+        <img
+          src="/images/interview-hero.png"
+          alt="Mock interview practice"
+          style={{
+            width: '100%',
+            borderRadius: 16,
+            objectFit: 'cover',
+          }}
+        />
+      </div>
 
+      {/* Form */}
+      <div
+        className="card"
+        style={{
+          maxWidth: 720,
+          margin: '0 auto',
+        }}
+      >
         {success && <div className="success-message">{success}</div>}
         {serverError && <div className="error-message">{serverError}</div>}
 

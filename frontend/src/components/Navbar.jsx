@@ -12,7 +12,7 @@ export default function Navbar() {
   const publicLinks = [
     { to: '/', label: 'Home' },
     { to: '/learning', label: 'Learning' },
-    { to: '/counseling', label: 'Counseling' },
+    // { to: '/counseling', label: 'Counseling' },
     { to: '/interview-practice', label: 'Interview Practice' },
     { to: '/my-meetings', label: 'My Meetings' },
     { to: '/admin/login', label: 'Admin' }
@@ -28,28 +28,30 @@ export default function Navbar() {
   return (
     <header className="nav">
       <div className="nav-inner">
-        <div className="brand">
-          <Link to="/" style={{ color: 'inherit', textDecoration: 'none' }}>
-            We Make Corder
-          </Link>
-        </div>
+        {/* Brand */}
+        <Link to="/" className="brand">
+          <img
+            src="/images/CompanyLogo.jpg"
+            alt="We Make Corder"
+            className="brand-logo"
+          />
+        
+        </Link>
 
+        {/* Mobile Toggle */}
         <button
           className="nav-toggle"
           onClick={() => setOpen(!open)}
           aria-expanded={open}
           aria-label="Toggle navigation"
         >
-          <span className="sr-only">Menu</span>
           <span className="bar" />
           <span className="bar" />
           <span className="bar" />
         </button>
 
-        <nav
-          className={'nav-links' + (open ? ' open' : '')}
-          onClick={() => setOpen(false)}
-        >
+        {/* Links */}
+        <nav className={`nav-links ${open ? 'open' : ''}`}>
           {/* Public links */}
           {!isAdmin &&
             publicLinks.map((l) => (
@@ -66,13 +68,9 @@ export default function Navbar() {
               </Link>
             ))}
 
-          {/* Auth actions */}
+          {/* Logout */}
           {isAuthenticated() && (
-            <button
-              className="btn"
-              style={{ marginLeft: 12 }}
-              onClick={logout}
-            >
+            <button className="btn nav-logout" onClick={logout}>
               Logout
             </button>
           )}

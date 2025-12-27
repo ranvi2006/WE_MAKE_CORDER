@@ -1,0 +1,22 @@
+.admin-table {
+    overflow-x: auto;
+  }
+  
+  .admin-row {
+    transition: background 0.15s ease;
+  }
+  
+  .admin-row:hover {
+    background: #F9FAFB;
+  }
+  
+  .admin-table a {
+    color: #1B3560;
+    font-weight: 500;
+    text-decoration: none;
+  }
+  
+  .admin-table a:hover {
+    text-decoration: underline;
+  }
+  

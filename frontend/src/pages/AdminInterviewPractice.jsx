@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import client from '../api/client'
+import '../pages/css/AdminInterviewPractice.css'
 
 export default function AdminInterviewPractice() {
   const [requests, setRequests] = useState([])
@@ -127,23 +128,60 @@ export default function AdminInterviewPractice() {
     })
   }
 
-  const statusOptions = ['Pending', 'Reviewed', 'Scheduled', 'Completed', 'Closed']
+  const statusOptions = [
+    'Pending',
+    'Reviewed',
+    'Scheduled',
+    'Completed',
+    'Closed'
+  ]
 
   return (
     <section>
+      {/* Header */}
+      <div
+        className="card"
+        style={{
+          marginBottom: 24,
+          display: 'grid',
+          gridTemplateColumns: '1.2fr 0.8fr',
+          gap: 24,
+          alignItems: 'center',
+          backgroundImage:
+            'linear-gradient(rgba(27,53,96,0.9), rgba(27,53,96,0.9)), url(/images/admin-interview-bg.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          color: '#fff'
+        }}
+      >
+        
+        <div>
+          <h2>Interview Practice Requests</h2>
+          <p style={{ marginTop: 8, opacity: 0.9 }}>
+            Schedule mock interviews, assign meeting links, and track
+            interview practice progress.
+          </p>
+        </div>
+
+        <img
+          src="/images/admin-interview-header.png"
+          alt="Interview scheduling"
+          style={{
+            width: '100%',
+            borderRadius: 14,
+            objectFit: 'cover'
+          }}
+        />
+      </div>
+
+      {/* Table */}
       <div className="card">
-        <h2>Interview Practice Requests</h2>
-
-        <p className="muted" style={{ marginTop: 8 }}>
-          Schedule interviews and manage meeting details.
-        </p>
-
         {loading && <p className="muted">Loading requests…</p>}
         {error && <div className="error-message">{error}</div>}
 
         {!loading && !error && (
           <div className="admin-table">
-            <div className="admin-row" style={{ fontWeight: 600 }}>
+            <div className="admin-row admin-head">
               <div>Name</div>
               <div>Email</div>
               <div>Role</div>

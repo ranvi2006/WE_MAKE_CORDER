@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import client from '../api/client'
+import '../pages/css/AdminCourse.css'
 
 export default function AdminCourses() {
   const [courses, setCourses] = useState([])
@@ -149,19 +150,49 @@ export default function AdminCourses() {
       })
     }
   }
-
   return (
     <section>
+      {/* Header */}
+      <div
+        className="card"
+        style={{
+          marginBottom: 24,
+          display: 'grid',
+          gridTemplateColumns: '1.2fr 0.8fr',
+          gap: 24,
+          alignItems: 'center',
+          backgroundImage:
+            'linear-gradient(rgba(27,53,96,0.9), rgba(27,53,96,0.9)), url(/images/admin-courses-bg.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          color: '#fff'
+        }}
+      >
+        <div>
+          <h2>Course Management</h2>
+          <p style={{ marginTop: 8, opacity: 0.9 }}>
+            Create, edit, publish, and manage all learning content
+            available on the platform.
+          </p>
+        </div>
+  
+        <img
+          src="/images/admin-courses-header.jpg"
+          alt="Course management"
+          style={{
+            width: '100%',
+            borderRadius: 14,
+            objectFit: 'cover'
+          }}
+        />
+      </div>
+  
+      {/* Content */}
       <div className="card">
-        <h2>Course Management</h2>
-        <p className="muted" style={{ marginTop: 8 }}>
-          Create, edit, publish, or delete courses.
-        </p>
-
         {error && <div className="error-message">{error}</div>}
-
+  
         {/* Create Course */}
-        <form onSubmit={createCourse} style={{ marginTop: 16 }}>
+        <form onSubmit={createCourse} style={{ marginTop: 8 }}>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <input
               placeholder="Title"
@@ -188,7 +219,7 @@ export default function AdminCourses() {
               <option>Intermediate</option>
               <option>Advanced</option>
             </select>
-
+  
             <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <input
                 type="checkbox"
@@ -199,12 +230,12 @@ export default function AdminCourses() {
               />
               Published
             </label>
-
+  
             <button className="btn" type="submit" disabled={creating}>
               {creating ? 'Creating…' : 'Add Course'}
             </button>
           </div>
-
+  
           <textarea
             placeholder="Description"
             value={newCourse.description}
@@ -215,13 +246,13 @@ export default function AdminCourses() {
             rows={3}
           />
         </form>
-
+  
         {/* Course List */}
         {loading && <p className="muted">Loading courses…</p>}
-
+  
         {!loading && (
           <div className="admin-table">
-            <div className="admin-row" style={{ fontWeight: 600 }}>
+            <div className="admin-row admin-head">
               <div>Title</div>
               <div>Duration</div>
               <div>Level</div>
@@ -229,11 +260,11 @@ export default function AdminCourses() {
               <div>Description</div>
               <div></div>
             </div>
-
+  
             {courses.map((course) => {
               const ed = editing[course._id]
               const isUpdating = updatingIds.has(course._id)
-
+  
               return (
                 <div key={course._id} className="admin-row">
                   <div>
@@ -248,7 +279,7 @@ export default function AdminCourses() {
                       <strong>{course.title}</strong>
                     )}
                   </div>
-
+  
                   <div>
                     {ed ? (
                       <input
@@ -261,7 +292,7 @@ export default function AdminCourses() {
                       course.duration || '—'
                     )}
                   </div>
-
+  
                   <div>
                     {ed ? (
                       <select
@@ -278,7 +309,7 @@ export default function AdminCourses() {
                       course.level
                     )}
                   </div>
-
+  
                   <div>
                     <input
                       type="checkbox"
@@ -294,7 +325,7 @@ export default function AdminCourses() {
                       }
                     />
                   </div>
-
+  
                   <div>
                     {ed ? (
                       <textarea
@@ -312,7 +343,7 @@ export default function AdminCourses() {
                       course.description
                     )}
                   </div>
-
+  
                   <div>
                     {ed ? (
                       <div style={{ display: 'flex', gap: 8 }}>
@@ -346,8 +377,9 @@ export default function AdminCourses() {
               )
             })}
           </div>
-      )}
+        )}
       </div>
     </section>
   )
+  
 }

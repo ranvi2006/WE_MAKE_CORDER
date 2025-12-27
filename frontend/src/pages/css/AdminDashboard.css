@@ -1,0 +1,18 @@
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  
+  .stat-card {
+    background: white;
+    border-radius: 14px;
+    padding: 18px;
+    border: 1px solid #CBD5F5;
+  }
+  
+  .premium-stat {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(4px);
+  }
+  

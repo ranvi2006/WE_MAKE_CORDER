@@ -1,0 +1,20 @@
+.form-row {
+  margin-top: 18px;
+}
+
+.form-row label {
+  font-weight: 500;
+}
+
+.form-row input,
+.form-row select,
+.form-row textarea {
+  border: 1px solid #CBD5F5;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.form-actions {
+  margin-top: 24px;
+  text-align: right;
+}

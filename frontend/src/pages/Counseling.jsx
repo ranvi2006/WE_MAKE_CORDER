@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import client from '../api/client'
+import '../pages/css/Counseling.css'
 
 function validateEmail(email) {
   return /\S+@\S+\.\S+/.test(email)
@@ -57,13 +58,48 @@ export default function Counseling() {
 
   return (
     <section>
-      <div className="card" style={{ maxWidth: 720, margin: '0 auto' }}>
-        <h2>Book Counseling</h2>
+      {/* Header */}
+      <div
+        className="card"
+        style={{
+          marginBottom: 32,
+          display: 'grid',
+          gridTemplateColumns: '1.1fr 0.9fr',
+          gap: 32,
+          alignItems: 'center',
+          maxWidth: 1100,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+        }}
+      >
+        <div>
+          <h2>Book Counseling</h2>
+          <p className="muted" style={{ marginTop: 10, maxWidth: 520 }}>
+            Get one-on-one guidance from experienced mentors to clarify
+            your goals, prepare for interviews, and plan your career path
+            with confidence.
+          </p>
+        </div>
 
-        <p className="muted" style={{ marginTop: 8 }}>
-          Tell us about your goals and we will get back to you soon.
-        </p>
+        <img
+          src="/images/counseling-hero.png"
+          alt="Career counseling"
+          style={{
+            width: '100%',
+            borderRadius: 16,
+            objectFit: 'cover',
+          }}
+        />
+      </div>
 
+      {/* Form */}
+      <div
+        className="card"
+        style={{
+          maxWidth: 720,
+          margin: '0 auto',
+        }}
+      >
         {success && <div className="success-message">{success}</div>}
         {serverError && <div className="error-message">{serverError}</div>}
 

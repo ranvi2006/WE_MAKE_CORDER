@@ -1,0 +1,13 @@
+.admin-table {
+    overflow-x: auto;
+  }
+  
+  .admin-row:hover {
+    background: #F9FAFB;
+  }
+  
+  .admin-head {
+    font-weight: 600;
+    background: #F3F4F6;
+  }
+  
