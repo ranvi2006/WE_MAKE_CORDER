@@ -1,21 +1,57 @@
-.form-row {
-    margin-top: 18px;
+/* Page */
+.interview-page {
+  padding: 24px 16px 64px;
+}
+
+/* HERO */
+.interview-hero {
+  max-width: 1100px;
+  margin: 0 auto 32px;
+  display: grid;
+  gap: 24px;
+  align-items: center;
+}
+
+.interview-hero-text h2 {
+  font-size: 2rem;
+  margin-bottom: 12px;
+}
+
+.interview-hero-text p {
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.interview-hero-image img {
+  width: 100%;
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+/* FORM */
+.interview-form {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* DESKTOP */
+@media (min-width: 768px) {
+  .interview-hero {
+    grid-template-columns: 1.1fr 0.9fr;
   }
-  
-  .form-row label {
-    font-weight: 500;
+
+  .interview-hero-text h2 {
+    font-size: 2.4rem;
   }
-  
-  .form-row input,
-  .form-row select,
-  .form-row textarea {
-    border: 1px solid #CBD5F5;
-    border-radius: 10px;
-    padding: 10px 12px;
+}
+
+/* MOBILE POLISH */
+@media (max-width: 767px) {
+  .interview-hero-text {
+    text-align: left;
   }
-  
-  .form-actions {
-    margin-top: 24px;
-    text-align: right;
+
+  .interview-hero-text h2 {
+    font-size: 1.8rem;
   }
-  
+}

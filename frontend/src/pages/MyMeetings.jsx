@@ -1,48 +1,39 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useAuth } from '../context/AuthContext'
+import { Navigate } from 'react-router-dom'
 import client from '../api/client'
 import '../pages/css/MyMeeting.css'
 
-function validateEmail(email) {
-  return /\S+@\S+\.\S+/.test(email)
-}
-
 export default function MyMeetings() {
-  const [email, setEmail] = useState('')
-  const [loading, setLoading] = useState(false)
+  const { user, isUser } = useAuth()
+  const [meetings, setMeetings] = useState([])
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [data, setData] = useState({
-    counselingRequests: [],
-    interviewPracticeRequests: []
-  })
 
-  async function handleSubmit(e) {
-    e.preventDefault()
-    setError('')
-    setData({ counselingRequests: [], interviewPracticeRequests: [] })
+  useEffect(() => {
+    if (!isUser()) return
 
-    if (!email || !validateEmail(email)) {
-      setError('Please enter a valid email address')
-      return
+    async function fetchMeetings() {
+      try {
+        setLoading(true)
+        const res = await client.get('/api/users/my-meetings')
+        setMeetings(res.data || [])
+      } catch (err) {
+        setError(
+          err?.response?.data?.message ||
+            err.message ||
+            'Failed to fetch meetings'
+        )
+      } finally {
+        setLoading(false)
+      }
     }
 
-    setLoading(true)
-    try {
-      const res = await client.get('/api/my-requests', {
-        params: { email }
-      })
-      setData({
-        counselingRequests: res.data?.counselingRequests || [],
-        interviewPracticeRequests: res.data?.interviewPracticeRequests || []
-      })
-    } catch (err) {
-      setError(
-        err?.response?.data?.message ||
-          err.message ||
-          'Failed to fetch requests'
-      )
-    } finally {
-      setLoading(false)
-    }
+    fetchMeetings()
+  }, [isUser])
+
+  if (!isUser()) {
+    return <Navigate to="/login" replace />
   }
 
   return (
@@ -64,9 +55,8 @@ export default function MyMeetings() {
         <div>
           <h2>My Meetings</h2>
           <p className="muted" style={{ marginTop: 10, maxWidth: 520 }}>
-            Track your counseling and interview practice requests,
-            view their status, and join scheduled meetings — all in
-            one place.
+            Track your interview practice bookings, view their status, and join
+            scheduled meetings — all in one place.
           </p>
         </div>
 
@@ -81,70 +71,119 @@ export default function MyMeetings() {
         />
       </div>
 
-      {/* Search */}
+      {/* Meetings List */}
       <div className="card" style={{ maxWidth: 900, margin: '0 auto' }}>
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            display: 'flex',
-            gap: 12,
-            flexWrap: 'wrap',
-            alignItems: 'center',
-          }}
-        >
-          <input
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{ flex: '1 1 320px' }}
-          />
-          <button className="btn" type="submit" disabled={loading}>
-            {loading ? 'Searching…' : 'Find Meetings'}
-          </button>
-        </form>
+        <h3>Interview Practice Bookings</h3>
 
-        {error && <div className="error-message">{error}</div>}
-        {loading && <p className="muted">Loading…</p>}
+        {loading && <p className="muted" style={{ marginTop: 16 }}>Loading...</p>}
 
-        {/* Counseling Requests */}
-        {data.counselingRequests.length > 0 && (
-          <div style={{ marginTop: 28 }}>
-            <h3>Counseling Requests</h3>
-            {data.counselingRequests.map((req) => (
-              <div key={req._id} className="card" style={{ marginTop: 12 }}>
-                <div><strong>Goal:</strong> {req.goal}</div>
-                <div><strong>Status:</strong> {req.status}</div>
-                <div className="muted">
-                  Requested on:{' '}
-                  {new Date(req.createdAt).toLocaleString()}
-                </div>
-              </div>
-            ))}
+        {error && (
+          <div className="error-message" style={{ marginTop: 16 }}>
+            {error}
           </div>
         )}
 
-        {/* Interview Practice Requests */}
-        {data.interviewPracticeRequests.length > 0 && (
-          <div style={{ marginTop: 28 }}>
-            <h3>Interview Practice Requests</h3>
-            {data.interviewPracticeRequests.map((req) => (
-              <div key={req._id} className="card" style={{ marginTop: 12 }}>
-                <div><strong>Role:</strong> {req.role}</div>
-                <div><strong>Status:</strong> {req.status}</div>
-                <div>
-                  <strong>Meeting Time:</strong>{' '}
-                  {req.meetingTime
-                    ? new Date(req.meetingTime).toLocaleString()
-                    : 'Not scheduled'}
+        {!loading && !error && meetings.length === 0 && (
+          <p className="muted" style={{ marginTop: 16 }}>
+            You don't have any scheduled meetings yet.
+          </p>
+        )}
+
+        {!loading && !error && meetings.length > 0 && (
+          <div style={{ marginTop: 24 }}>
+            {meetings.map((meeting) => (
+              <div
+                key={meeting._id}
+                className="course-card"
+                style={{
+                  marginTop: 16,
+                  padding: 20,
+                  border: '1px solid #e5e7eb',
+                }}
+              >
+                <h3 style={{ marginBottom: 16 }}>{meeting.interviewTitle}</h3>
+
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                    gap: 16,
+                    marginTop: 16,
+                  }}
+                >
+                  <div>
+                    <strong>Mentor:</strong>{' '}
+                    <span className="muted">
+                      {meeting.mentorName || 'To be assigned'}
+                    </span>
+                  </div>
+
+                  <div>
+                    <strong>Date:</strong>{' '}
+                    <span className="muted">
+                      {meeting.date
+                        ? new Date(meeting.date).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                          })
+                        : 'Not scheduled'}
+                    </span>
+                  </div>
+
+                  <div>
+                    <strong>Time:</strong>{' '}
+                    <span className="muted">
+                      {meeting.time || 'Not scheduled'}
+                    </span>
+                  </div>
+
+                  <div>
+                    <strong>Mode:</strong>{' '}
+                    <span className="muted">{meeting.mode}</span>
+                  </div>
+
+                  <div>
+                    <strong>Status:</strong>{' '}
+                    <span
+                      style={{
+                        padding: '4px 8px',
+                        borderRadius: 4,
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        background:
+                          meeting.status === 'Completed'
+                            ? '#d1fae5'
+                            : meeting.status === 'Scheduled'
+                            ? '#dbeafe'
+                            : '#fef3c7',
+                        color:
+                          meeting.status === 'Completed'
+                            ? '#065f46'
+                            : meeting.status === 'Scheduled'
+                            ? '#1e40af'
+                            : '#92400e',
+                      }}
+                    >
+                      {meeting.status}
+                    </span>
+                  </div>
+
+                  <div>
+                    <strong>Booking ID:</strong>{' '}
+                    <span className="muted" style={{ fontFamily: 'monospace', fontSize: '0.875rem' }}>
+                      {meeting.bookingId}
+                    </span>
+                  </div>
                 </div>
-                {req.meetingLink && (
-                  <div style={{ marginTop: 10 }}>
+
+                {meeting.meetingLink && (
+                  <div style={{ marginTop: 20 }}>
                     <a
-                      className="btn"
-                      href={req.meetingLink}
+                      href={meeting.meetingLink}
                       target="_blank"
                       rel="noopener noreferrer"
+                      className="btn"
                     >
                       Join Meeting
                     </a>
@@ -154,15 +193,6 @@ export default function MyMeetings() {
             ))}
           </div>
         )}
-
-        {!loading &&
-          !error &&
-          data.counselingRequests.length === 0 &&
-          data.interviewPracticeRequests.length === 0 && (
-            <p className="muted" style={{ marginTop: 20 }}>
-              No requests found for this email.
-            </p>
-          )}
       </div>
     </section>
   )

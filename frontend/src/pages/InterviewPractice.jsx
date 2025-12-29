@@ -45,9 +45,7 @@ export default function InterviewPractice() {
     setLoading(true)
     try {
       await client.post('/api/interview-practice-requests', form)
-      setSuccess(
-        'Your interview practice request has been submitted successfully.'
-      )
+      setSuccess('Your interview practice request has been submitted successfully.')
       setForm({
         name: '',
         email: '',
@@ -67,49 +65,25 @@ export default function InterviewPractice() {
   }
 
   return (
-    <section>
-      {/* Header */}
-      <div
-        className="card"
-        style={{
-          marginBottom: 32,
-          display: 'grid',
-          gridTemplateColumns: '1.1fr 0.9fr',
-          gap: 32,
-          alignItems: 'center',
-          maxWidth: 1100,
-          marginLeft: 'auto',
-          marginRight: 'auto',
-        }}
-      >
-        <div>
+    <section className="interview-page">
+      {/* Hero */}
+      <div className="interview-hero card">
+        <div className="interview-hero-text">
           <h2>Interview Practice</h2>
-          <p className="muted" style={{ marginTop: 10, maxWidth: 520 }}>
-            Practice real interview scenarios with experienced mentors
-            and receive actionable feedback to improve your confidence,
-            communication, and technical clarity.
+          <p>
+            Practice real interview scenarios with experienced mentors and receive
+            actionable feedback to improve your confidence, communication, and
+            technical clarity.
           </p>
         </div>
 
-        <img
-          src="/images/interview-hero.png"
-          alt="Mock interview practice"
-          style={{
-            width: '100%',
-            borderRadius: 16,
-            objectFit: 'cover',
-          }}
-        />
+        <div className="interview-hero-image">
+          <img src="/images/interview-hero.png" alt="Mock interview practice" />
+        </div>
       </div>
 
       {/* Form */}
-      <div
-        className="card"
-        style={{
-          maxWidth: 720,
-          margin: '0 auto',
-        }}
-      >
+      <div className="card interview-form">
         {success && <div className="success-message">{success}</div>}
         {serverError && <div className="error-message">{serverError}</div>}
 
@@ -122,9 +96,7 @@ export default function InterviewPractice() {
               onChange={handleChange}
               placeholder="Your full name"
             />
-            {errors.name && (
-              <div className="field-error">{errors.name}</div>
-            )}
+            {errors.name && <div className="field-error">{errors.name}</div>}
           </div>
 
           <div className="form-row">
@@ -136,9 +108,7 @@ export default function InterviewPractice() {
               onChange={handleChange}
               placeholder="you@example.com"
             />
-            {errors.email && (
-              <div className="field-error">{errors.email}</div>
-            )}
+            {errors.email && <div className="field-error">{errors.email}</div>}
           </div>
 
           <div className="form-row">
@@ -149,9 +119,7 @@ export default function InterviewPractice() {
               onChange={handleChange}
               placeholder="Frontend Developer"
             />
-            {errors.role && (
-              <div className="field-error">{errors.role}</div>
-            )}
+            {errors.role && <div className="field-error">{errors.role}</div>}
           </div>
 
           <div className="form-row">

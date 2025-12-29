@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout'
 import PrivateRoute from './components/PrivateRoute'
+import UserProtectedRoute from './components/UserProtectedRoute'
 
 // Public pages
 import Home from './pages/Home'
@@ -9,6 +10,11 @@ import Learning from './pages/Learning'
 import Counseling from './pages/Counseling'
 import InterviewPractice from './pages/InterviewPractice'
 import MyMeetings from './pages/MyMeetings'
+
+// Auth pages
+import Login from './pages/Login'
+import Register from './pages/Register'
+import Profile from './pages/Profile'
 
 // Admin pages
 import AdminLogin from './pages/AdminLogin'
@@ -27,8 +33,29 @@ export default function App() {
           <Route path="/about" element={<About />} />
           <Route path="/learning" element={<Learning />} />
           <Route path="/counseling" element={<Counseling />} />
-          <Route path="/interview-practice" element={<InterviewPractice />} />
           <Route path="/my-meetings" element={<MyMeetings />} />
+
+          {/* ================= AUTH ROUTES ================= */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          {/* ================= PROTECTED USER ROUTES ================= */}
+          <Route
+            path="/profile"
+            element={
+              <UserProtectedRoute>
+                <Profile />
+              </UserProtectedRoute>
+            }
+          />
+          <Route
+            path="/interview-practice"
+            element={
+              <UserProtectedRoute>
+                <InterviewPractice />
+              </UserProtectedRoute>
+            }
+          />
 
           {/* ================= ADMIN ROUTES ================= */}
           <Route path="/admin/login" element={<AdminLogin />} />

@@ -1,8 +1,8 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
-export default function PrivateRoute({ children }) {
-  const { loading, isAdminUser } = useAuth()
+export default function UserProtectedRoute({ children }) {
+  const { loading, isUser } = useAuth()
 
   // While checking auth state, show loading
   if (loading) {
@@ -18,11 +18,12 @@ export default function PrivateRoute({ children }) {
     )
   }
 
-  // Not logged in as admin → redirect to admin login
-  if (!isAdminUser()) {
-    return <Navigate to="/admin/login" replace />
+  // Not logged in as user → redirect to login
+  if (!isUser()) {
+    return <Navigate to="/login" replace />
   }
 
-  // Logged in as admin → allow access
+  // Logged in as user → allow access
   return children
 }
+

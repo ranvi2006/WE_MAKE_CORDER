@@ -23,7 +23,7 @@ export default function AdminLogin() {
 
     setLoading(true)
     try {
-      await login({ email, password })
+      await loginAdmin({ email, password })
       navigate('/admin/dashboard')
     } catch (err) {
       setError(
